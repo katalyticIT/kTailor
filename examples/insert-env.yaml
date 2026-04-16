@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insert-env
+  labels:
+    ktailor.io/fit: "central.insert-env"  # inserts env KTAILOR-TEST which gets loop printed on stdout
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insert-env
+  template:
+    metadata:
+      labels:
+        app: insert-env
+    spec:
+      containers:
+      - name: insert-env
+        image: alpine:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - "while true; do echo \"$(date) - KTAILORTEST: ${KTAILORTEST}\"; sleep 3; done"
+        env:
+        - name: KTAILORTEST
+          value: "This text gets overwritten by ktailor."

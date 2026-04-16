@@ -1,0 +1,25 @@
+---
+# 1. Der Issuer (die Instanz, die das Zertifikat ausstellt)
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ktailor-issuer
+  namespace: ktailor
+spec:
+  selfSigned: {}
+
+---
+# 2. Das Zertifikat (das den Namen des Secrets definiert)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ktailor-cert
+  namespace: ktailor
+spec:
+  dnsNames:
+  - ktailor.ktailor.svc
+  - ktailor.ktailor.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: ktailor-issuer
+  secretName: ktailor-tls-secret # <-- Das ist das Secret, das dem Pod fehlt!

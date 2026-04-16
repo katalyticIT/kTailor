@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lft-plus222d
+  namespace: ktailor
+  labels:
+    ktailor.io/template: "true"
+  annotations:
+    on.change.inc: "2"
+data:
+  template: |
+    ---
+    kind: ktailor-template
+    meta:
+      name: lft-plus222d
+      autor: "katalytic IT"
+      version: 0.1
+      date: "2026-04-06"
+
+    modifyContainers:
+      insertIfNotExists:
+        volumeMounts:
+          - name: shared-lft-volume
+            mountPath: /lft_volume
+      insertOrOverwrite:
+        env:
+          - name: FAKETIME
+            value: "+222d"
+      setOrAppend:
+        env:
+          - name: LD_PRELOAD
+            value: "/lft_volume/libfaketime.so.1"
+
+    addInitContainers:
+      - name: inject-libfaketime
+        image: katalytic/libfaketime_init:1.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: LFT_DESTPATH
+            value: /lft_volume
+        volumeMounts:
+        - name: shared-lft-volume
+          mountPath:  /lft_volume
+
+    addVolumes:
+      volumes:
+        - name: shared-lft-volume
+          emptyDir: {}

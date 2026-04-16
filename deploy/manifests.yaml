@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ktailor-config
+  namespace: ktailor
+data:
+  ktailor.yaml: |
+    ---
+    transport:
+      port: 8443
+      secure: true
+      cert: /etc/ktailor/certs/tls.crt
+      key: /etc/ktailor/certs/tls.key
+    logging:
+      level: INFO
+    templates:
+      allowCustomTemplates: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ktailor
+  namespace: ktailor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ktailor
+  template:
+    metadata:
+      labels:
+        app: ktailor
+    spec:
+      serviceAccountName: ktailor
+# ... (in der manifests.yaml unterhalb von spec.containers) ...
+      containers:
+      - name: ktailor
+        image: localhost:6000/ktailor:latest
+        ports:
+        - containerPort: 8443
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/ktailor/certs
+          readOnly: true
+        - name: config
+          mountPath: /etc/ktailor
+      volumes:
+      - name: tls-certs
+        secret:
+          secretName: ktailor-tls-secret
+      - name: config
+        configMap:
+          name: ktailor-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ktailor
+  namespace: ktailor
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: ktailor
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: ktailor-webhook
+  annotations:
+    cert-manager.io/inject-ca-from: ktailor/ktailor-cert
+webhooks:
+- name: ktailor.ktailor.svc
+  failurePolicy: Ignore
+  clientConfig:
+    service:
+      name: ktailor
+      namespace: ktailor
+      path: "/mutate"
+  rules:
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["apps"]
+    apiVersions: ["v1"]
+    resources: ["deployments"]
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+
