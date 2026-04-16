@@ -3,7 +3,7 @@
 
 kTailor is a lightweight and blazing-fast Kubernetes Mutating Webhook that dynamically modifies Deployments on the fly. By utilizing simple, reusable YAML templates stored in ConfigMaps, it effortlessly injects sidecars, environment variables, or volumes without requiring changes to the original source manifests.
 
-[img/kTailor_made_suit.png](kTailor tailors a custom-made suit for your container.)
+![kTailor a suit for your container](img/kTailor_made_suit.png "kTailor tailors a custom-made suit for your container.")
 
 ## Introduction
 
@@ -62,7 +62,7 @@ The actual template YAML is simply placed inside the `data` section under the ge
 A kTailor template consists of different modification segments:
 * `modifyContainers`: Alters existing containers. Supports three operations:
   * `insertIfNotExists`: Adds the value only if the key is entirely missing.
-  * `insertOrOverwrite`: Adds the value or brutally overwrites an existing one.
+  * `insertOrOverwrite`: Adds the value or overwrites an existing one.
   * `setOrAppend`: Adds the value or appends it to an existing one (e.g., merging strings with a colon delimiter).
 * `addInitContainers`: Injects completely new InitContainers.
 * `addContainers`: Injects completely new sidecar containers.
