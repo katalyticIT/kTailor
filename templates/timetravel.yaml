@@ -30,6 +30,7 @@ data:
         env:
           - name: LD_PRELOAD
             value: "/lft_volume/libfaketime.so.1"
+            separator: ":"
 
     addInitContainers:
       - name: inject-libfaketime
