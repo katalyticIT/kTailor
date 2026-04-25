@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: lft-plus222d
-  namespace: ktailor
+  namespace: default
   labels:
     ktailor.io/template: "true"
   annotations:
