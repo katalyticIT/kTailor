@@ -6,19 +6,10 @@ metadata:
   namespace: ktailor
   labels:
     ktailor.io/template: "true"
-  annotations:
-    on.change.inc: "2"
 
 data:
   template: |
     ---
-    kind: ktailor-template
-    meta:
-      name: insert-env
-      autor: "katalytic IT"
-      version: 1.0
-      date: "2026-03-31"
-
     modifyContainers:
       insertOrOverwrite:
         env:
