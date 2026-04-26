@@ -17,6 +17,8 @@ kTailor follows the **KISS principle** (Keep It Simple, Stupid). It is designed 
 **When NOT to use kTailor:**
 If you need highly complex policy enforcement, conditional logic, or want to mutate/validate a wide variety of Kubernetes resources beyond standard Deployments, kTailor might be too simple for your use case. In those scenarios, we highly recommend looking into established policy engines like [Kyverno](https://kyverno.io/) or [OPA Gatekeeper](https://openpolicyagent.org/docs/latest/kubernetes-introduction/).
 
+For documentation, visit the [ktailor.dev](https://www.ktailor.dev/) webpage.
+
 ## Installation
 
 Deploying kTailor is streamlined via the included `Makefile`.
