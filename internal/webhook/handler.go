@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"ktailor/internal/config"
+	"ktailor/internal/filter"
 	"ktailor/internal/logger"
 	"ktailor/internal/modifier"
 
@@ -26,7 +27,7 @@ var (
 	deserializer  = codecs.UniversalDeserializer()
 )
 
-const LabelKey = "ktailor.io/fit"
+const LabelKey = "ktailor.dev/fit"
 
 type loggingResponseWriter struct {
 	http.ResponseWriter
@@ -78,7 +79,14 @@ func Serve(cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailor
 }
 
 func mutate(req *admissionv1.AdmissionRequest, cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailorNamespace string) *admissionv1.AdmissionResponse {
+
+	// Check if deployment
 	if req.Resource.Resource != "deployments" {
+		return &admissionv1.AdmissionResponse{Allowed: true}
+	}
+
+	// Check namespace permissions before doing any expensive JSON unmarshaling
+	if !filter.IsNamespaceAllowed(req.Namespace, cfg.Namespaces, ktailorNamespace) {
 		return &admissionv1.AdmissionResponse{Allowed: true}
 	}
 

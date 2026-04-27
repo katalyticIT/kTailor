@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: timetravel-test
-  namespace: ktailor
+  namespace: default
   labels:
     # This label triggers the Webhook
     ktailor.io/fit: "local.lft-plus222d" # inserts libfaketime and moves pod 222d into future

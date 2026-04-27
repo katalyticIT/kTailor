@@ -2,21 +2,14 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: lft-plus222d
-  namespace: ktailor
+  namespace: default
   labels:
-    ktailor.io/template: "true"
+    ktailor.dev/template: "true"
   annotations:
     on.change.inc: "2"
 data:
   template: |
     ---
-    kind: ktailor-template
-    meta:
-      name: lft-plus222d
-      autor: "katalytic IT"
-      version: 0.1
-      date: "2026-04-06"
-
     modifyContainers:
       insertIfNotExists:
         volumeMounts:

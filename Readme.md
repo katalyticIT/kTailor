@@ -56,7 +56,7 @@ To maximize robustness and integrate seamlessly with GitOps workflows, kTailor t
 For the internal Informer Cache to discover a template, the ConfigMap **must** have the following label:
 ```yaml
 labels:
-  ktailor.io/template: "true"
+  ktailor.dev/template: "true"
 ```
 The actual template YAML is simply placed inside the `data` section under the generic `template` key.
 
@@ -71,7 +71,7 @@ A kTailor template consists of different modification segments:
 * `addVolumes`: Attaches new volumes to the Pod spec.
 
 ### Triggering the Webhook (`local` vs. `central`)
-To instruct kTailor to modify a Deployment, you add the `ktailor.io/fit` label to your Deployment manifest. The value format is `<scope>.<templateName>`.
+To instruct kTailor to modify a Deployment, you add the `ktailor.dev/fit` label to your Deployment manifest. The value format is `<scope>.<templateName>`.
 
 * **`central.my-template`**: kTailor looks for the ConfigMap `my-template` in its **own namespace** (usually `ktailor`). These are globally managed by cluster administrators.
 * **`local.my-template`**: kTailor looks for the ConfigMap in the **Deployment's namespace**. This allows application developers to write and manage their own templates.
@@ -93,7 +93,7 @@ metadata:
   name: ktailor-test
   namespace: ktailor
   labels:
-    ktailor.io/template: "true"
+    ktailor.dev/template: "true"
 data:
   template: |
     kind: ktailor-template
@@ -111,7 +111,7 @@ kind: Deployment
 metadata:
   name: ktailor-insert-env
   labels:
-    ktailor.io/fit: "central.ktailor-test"
+    ktailor.dev/fit: "central.ktailor-test"
 spec:
   # ... standard deployment spec ...
 ```
@@ -133,7 +133,7 @@ metadata:
   name: lft-plus222d
   namespace: ktailor
   labels:
-    ktailor.io/template: "true"
+    ktailor.dev/template: "true"
 data:
   template: |
     kind: ktailor-template
@@ -166,7 +166,7 @@ data:
         - name: shared-lft-volume
           emptyDir: {}
 ```
-By simply adding `ktailor.io/fit: "central.lft-plus222d"` to any Deployment, the application inside will instantly believe it is running 222 days in the future, completely abstracting the complex volume and init-container logic away from the developer.
+By simply adding `ktailor.dev/fit: "central.lft-plus222d"` to any Deployment, the application inside will instantly believe it is running 222 days in the future, completely abstracting the complex volume and init-container logic away from the developer.
 
 ## Acknowledgements
 A quick note: AI tools were used to assist in the coding and documentation of this project.

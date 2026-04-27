@@ -16,13 +16,24 @@ data:
       level: INFO
     templates:
       allowCustomTemplates: true
-
+    namespaces:
+      mode: blocklist   # Options: blocklist, allowlist
+      match:
+        exact:
+          - ignore-this-namespace
+        startsWith:
+          - "test-"
+          - "dev-"
+        endsWith:
+          - "-tmp"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ktailor
   namespace: ktailor
+  annotations:
+    changeOnDeploy: "1"
 spec:
   replicas: 1
   selector:
@@ -34,7 +45,6 @@ spec:
         app: ktailor
     spec:
       serviceAccountName: ktailor
-# ... (in der manifests.yaml unterhalb von spec.containers) ...
       containers:
       - name: ktailor
         image: localhost:6000/ktailor:latest
