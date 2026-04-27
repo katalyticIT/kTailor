@@ -5,7 +5,7 @@ metadata:
   name: insert-env
   namespace: ktailor
   labels:
-    ktailor.io/template: "true"
+    ktailor.dev/template: "true"
 
 data:
   template: |

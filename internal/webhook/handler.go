@@ -27,7 +27,7 @@ var (
 	deserializer  = codecs.UniversalDeserializer()
 )
 
-const LabelKey = "ktailor.io/fit"
+const LabelKey = "ktailor.dev/fit"
 
 type loggingResponseWriter struct {
 	http.ResponseWriter

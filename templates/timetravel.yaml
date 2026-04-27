@@ -4,7 +4,7 @@ metadata:
   name: lft-plus222d
   namespace: default
   labels:
-    ktailor.io/template: "true"
+    ktailor.dev/template: "true"
   annotations:
     on.change.inc: "2"
 data:

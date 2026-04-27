@@ -46,7 +46,7 @@ func main() {
 	}
 
 	tweakListOptions := func(options *metav1.ListOptions) {
-		options.LabelSelector = "ktailor.io/template=true"
+		options.LabelSelector = "ktailor.dev/template=true"
 	}
 	factory := informers.NewSharedInformerFactoryWithOptions(
 		clientset,
