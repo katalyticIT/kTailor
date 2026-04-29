@@ -168,6 +168,10 @@ data:
 ```
 By simply adding `ktailor.dev/fit: "central.lft-plus222d"` to any Deployment, the application inside will instantly believe it is running 222 days in the future, completely abstracting the complex volume and init-container logic away from the developer.
 
+## Online demo
+
+You can try kTailor for free at [killercoda.com](https://killercoda.com/ktailor-demo): The scenario spawns a small one-node kubernetes cluster and installs the webhook along with two small demo applications.
+
 ## Acknowledgements
 A quick note: AI tools were used to assist in the coding and documentation of this project.
 
