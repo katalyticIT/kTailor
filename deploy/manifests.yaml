@@ -35,7 +35,7 @@ metadata:
   annotations:
     changeOnDeploy: "1"
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ktailor
@@ -44,10 +44,17 @@ spec:
       labels:
         app: ktailor
     spec:
+      resources:
+        requests:
+          memory: "100Mi"
+          cpu: "0.2"
+        limits:
+          memory: "400Mi"
+          cpu: "1"
       serviceAccountName: ktailor
       containers:
       - name: ktailor
-        image: localhost:6000/ktailor:latest
+        image: katalytic/ktailor:latest
         ports:
         - containerPort: 8443
         env:
