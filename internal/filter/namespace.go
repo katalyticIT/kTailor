@@ -7,30 +7,41 @@ import (
 	"ktailor/internal/logger"
 )
 
-var forbiddenNamespaces = []string{
-	"kube-system",
-	"kube-node-lease",
-	"kube-public",
+var internalForbiddenExact = []string{
 	"cert-manager",
+	"cattle-system",
+}
+
+var internalForbiddenStartsWith = []string{
+	"kube-",
+	"openshift-",
 }
 
 // IsNamespaceAllowed checks if mutation is permitted in the given namespace.
 func IsNamespaceAllowed(ns string, cfg config.NamespaceConfig, ktailorNamespace string) bool {
-	// 1. Check hardcoded forbidden namespaces
-	for _, forbidden := range forbiddenNamespaces {
+	// 1. Prüfe auf exakte interne System-Namespaces
+	for _, forbidden := range internalForbiddenExact {
 		if ns == forbidden {
-			logger.Logf("DEBUG", "Namespace '%s' is in internal forbidden list. Skipped.", ns)
+			logger.Logf("DEBUG", "Namespace '%s' is in internal forbidden exact list. Skipped.", ns)
 			return false
 		}
 	}
 
-	// 2. Prevent mutation of kTailor itself
+	// 2. Prüfe auf Präfixe von internen System-Namespaces
+	for _, prefix := range internalForbiddenStartsWith {
+		if strings.HasPrefix(ns, prefix) {
+			logger.Logf("DEBUG", "Namespace '%s' starts with internal forbidden prefix '%s'. Skipped.", ns, prefix)
+			return false
+		}
+	}
+
+	// 3. Prüfe auf kTailor's eigenen Namespace
 	if ns == ktailorNamespace {
 		logger.Logf("DEBUG", "Namespace '%s' is kTailor's own namespace. Skipped.", ns)
 		return false
 	}
 
-	// 3. Check against configured rules
+	// 4. Check against configured rules
 	matched := false
 
 	// Check Exact
