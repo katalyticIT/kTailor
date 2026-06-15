@@ -1,6 +1,6 @@
 module ktailor
 
-go 1.22
+go 1.24
 
 require (
 	github.com/mattbaird/jsonpatch v0.0.0-20240118010651-0ba75a80ca38
