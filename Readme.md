@@ -26,16 +26,19 @@ Deploying kTailor is streamlined via the included `Makefile`.
 **Prerequisites:**
 * A running Kubernetes Cluster.
 * `cert-manager` installed (required to automatically generate the TLS certificates for the webhook).
-* `docker` and `go` installed on your local machine.
+* `docker` installed on your local machine.
+* optionally: `go` installed on your machine, if you just want to compile the binary locally.
 
 **Steps:**
 
 1. **Build the local binary (optional):**
+   Run this step only if you want to compile the binary locally. Otherwise proceed to step 2 and use the
+   golang docker image.
    ```bash
    make build
    ```
 2. **Build and push the Docker image:**
-   Ensure you adjust the `IMAGE_RGST` and `IMAGE_REPO` variables in the Makefile or pass them as environment variables.
+   (This step is alternatively to step 1.) Ensure you adjust the `IMAGE_RGST` and `IMAGE_REPO` variables in the Makefile or pass them as environment variables.
    ```bash
    make docker-build
    make docker-push
