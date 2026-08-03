@@ -21,11 +21,68 @@ For documentation, visit the [ktailor.dev](https://www.ktailor.dev/) webpage.
 
 ## Installation
 
+### Deployment with ready-to-go image from docker hub
+
+**Prerequisites:**
+* A running Kubernetes Cluster.
+* [cert-manager](https://github.com/cert-manager/cert-manager) installed (required to automatically generate the TLS certificates for the webhook).
+
+**Steps:**
+1. Clone the repository and change into its directory:
+   ```bash
+   git clone https://github.com/katalyticIT/kTailor.git
+   cd kTailor
+   ```
+2. Create the namespace and set the context to it:
+   ```bash
+   kubectl create namespace ktailor
+   kubectl config set-context --current --namespace=ktailor
+   ```
+
+3. Create the certificate issuer and the certificate for the webhook:
+   ```bash
+   kubectl apply -f deploy/certs.yaml
+   ```
+
+4. Create serviceAccount, role and rolebinding:
+   ```bash
+   kubectl apply -f deploy/rbac.yaml
+   ```
+
+5. Deploy the webhook with service etc, then deploy the first template and a test application:
+   ```bash
+   kubectl apply -f deploy/manifests.yaml
+   kubectl apply -f deploy/template-test.yaml
+   ```
+
+6. Check the logs of the test application:
+   ```bash
+   kubectl logs -n default -l app=ktailor-test
+   ```
+   It shows the original content of the env variable:
+   ```
+   2026-08-03 21:23:34+00:00 KTAILORTEST is defined with base value from deployment.
+   2026-08-03 21:23:39+00:00 KTAILORTEST is defined with base value from deployment.
+   ```
+
+7. Now label the deployment with the kTailor trigger:
+   ```bash
+   kubectl label --overwrite deployment ktailor-test  ktailor.dev/fit="central.ktailor-test-template" -n default
+   ```
+
+8. Check the logs again (see above) and you'll find that the output shows the value which was set by the kTailor template:
+   ```
+   2026-08-03 21:23:53+00:00 Env set by central kTailor template.
+   2026-08-03 21:23:58+00:00 Env set by central kTailor template.
+   ```
+
+
+### From source
 Deploying kTailor is streamlined via the included `Makefile`.
 
 **Prerequisites:**
 * A running Kubernetes Cluster.
-* `cert-manager` installed (required to automatically generate the TLS certificates for the webhook).
+* [cert-manager](https://github.com/cert-manager/cert-manager) installed (required to automatically generate the TLS certificates for the webhook).
 * `docker` installed on your local machine.
 * optionally: `go` installed on your machine, if you just want to compile the binary locally.
 
