@@ -141,6 +141,11 @@ To instruct kTailor to modify a Deployment, you add the `ktailor.dev/fit` label 
 * **`central.my-template`**: kTailor looks for the ConfigMap `my-template` in its **own namespace** (usually `ktailor`). These are globally managed by cluster administrators.
 * **`local.my-template`**: kTailor looks for the ConfigMap in the **Deployment's namespace**. This allows application developers to write and manage their own templates.
 
+Example:
+```
+kubectl label --overwrite deployment myapp ktailor.dev/fit="local.ktlr-proxy-tmpl"
+```
+
 **Security Note:** If security takes precedence over developer convenience (to prevent privilege escalation via local namespaces), cluster administrators can disable local templates by setting `allowCustomTemplates: false` in the `ktailor-config` ConfigMap.
 
 ## Examples
