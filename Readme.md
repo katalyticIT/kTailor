@@ -6,6 +6,9 @@ Deployments on the fly. By utilizing simple, reusable YAML templates stored in C
 it effortlessly injects sidecars, environment variables, or volumes
 _without requiring changes to the original source manifests_.
 
+Try kTailor online for free at [killercoda.com](https://killercoda.com/ktailor-demo)
+and visit the [ktailor.dev](https://www.ktailor.dev/) documentation webpage.
+
 ![kTailor a suit for your container](img/kTailor_made_suit.png "kTailor tailors a custom-made suit for your container.")
 
 ## Introduction
