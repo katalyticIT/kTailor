@@ -1,0 +1,62 @@
+---
+# 1) the kTailor template, a simple configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ktailor-test-template
+  namespace: ktailor
+  labels:
+    ktailor.dev/template: "true"
+data:
+  ktailor-test.yaml: |
+    ---
+    kind: ktailor-template
+    meta:
+      name: ktailor-test
+      autor: "katalytic IT"
+      version: 1.0
+      date: "2026-03-31"
+
+    modifyContainers:
+      insertOrOverwrite:
+        env:
+          - name: KTAILORTEST
+            value: "Env set by central kTailor template."
+---
+# 2) a test deployment; the pod will output the variable KTAILORTEST and
+# therefore show a different content after adding a label to the deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ktailor-test
+  namespace: default # NOTE: kTailor won't mutate deployments in system namespaces or its own namespace
+  labels:
+    app: ktailor-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ktailor-test
+  template:
+    metadata:
+      labels:
+        app: ktailor-test
+    spec:
+      containers:
+      - name: ktailor-test
+        # Current Ubuntu-Minimal/Lite Image
+        image: ubuntu:24.04
+        imagePullPolicy: IfNotPresent
+        # Set env variable; will be overwritten by kTailor
+        env:
+        - name: KTAILORTEST
+          value: "KTAILORTEST is defined with base value from deployment."
+        # Endless loop, print variable every 5s
+        command: ["bash", "-c"]
+        args:
+          - |
+            while true; do
+              echo "$(date --rfc-3339=seconds) $KTAILORTEST"
+              sleep 5
+            done
+
