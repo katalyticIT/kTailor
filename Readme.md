@@ -1,7 +1,13 @@
 
 # kTailor
 
-kTailor is a lightweight and blazing-fast Kubernetes Mutating Webhook that dynamically modifies Deployments on the fly. By utilizing simple, reusable YAML templates stored in ConfigMaps, it effortlessly injects sidecars, environment variables, or volumes without requiring changes to the original source manifests.
+kTailor is a lightweight and blazing-fast Kubernetes Mutating Webhook that dynamically modifies
+Deployments on the fly. By utilizing simple, reusable YAML templates stored in ConfigMaps,
+it effortlessly injects sidecars, environment variables, or volumes
+_without requiring changes to the original source manifests_.
+
+Try kTailor online for free at [killercoda.com](https://killercoda.com/ktailor-demo)
+and visit the [ktailor.dev](https://www.ktailor.dev/) documentation webpage.
 
 ![kTailor a suit for your container](img/kTailor_made_suit.png "kTailor tailors a custom-made suit for your container.")
 
@@ -21,11 +27,70 @@ For documentation, visit the [ktailor.dev](https://www.ktailor.dev/) webpage.
 
 ## Installation
 
+Currently kTailor can be deployed via yaml files or installed from source (needs docker). A convenient helm chart is in the works.
+
+### Deployment with ready-to-go image from docker hub
+
+**Prerequisites:**
+* A running Kubernetes Cluster.
+* [cert-manager](https://github.com/cert-manager/cert-manager) installed (required to automatically generate the TLS certificates for the webhook).
+
+**Steps:**
+1. Clone the repository and change into its directory:
+   ```bash
+   git clone https://github.com/katalyticIT/kTailor.git
+   cd kTailor
+   ```
+2. Create the namespace and set the context to it:
+   ```bash
+   kubectl create namespace ktailor
+   kubectl config set-context --current --namespace=ktailor
+   ```
+
+3. Create the certificate issuer and the certificate for the webhook:
+   ```bash
+   kubectl apply -f deploy/certs.yaml
+   ```
+
+4. Create serviceAccount, role and rolebinding:
+   ```bash
+   kubectl apply -f deploy/rbac.yaml
+   ```
+
+5. Deploy the webhook with service etc, then deploy the first template and a test application:
+   ```bash
+   kubectl apply -f deploy/manifests.yaml
+   kubectl apply -f deploy/template-test.yaml
+   ```
+
+6. Check the logs of the test application:
+   ```bash
+   kubectl logs -n default -l app=ktailor-test
+   ```
+   It shows the original content of the env variable:
+   ```
+   2026-08-03 21:23:34+00:00 KTAILORTEST is defined with base value from deployment.
+   2026-08-03 21:23:39+00:00 KTAILORTEST is defined with base value from deployment.
+   ```
+
+7. Now label the deployment with the kTailor trigger:
+   ```bash
+   kubectl label --overwrite deployment ktailor-test  ktailor.dev/fit="central.ktailor-test-template" -n default
+   ```
+
+8. Check the logs again (see above) and you'll find that the output shows the value which was set by the kTailor template:
+   ```
+   2026-08-03 21:23:53+00:00 Env set by central kTailor template.
+   2026-08-03 21:23:58+00:00 Env set by central kTailor template.
+   ```
+
+
+### From source
 Deploying kTailor is streamlined via the included `Makefile`.
 
 **Prerequisites:**
 * A running Kubernetes Cluster.
-* `cert-manager` installed (required to automatically generate the TLS certificates for the webhook).
+* [cert-manager](https://github.com/cert-manager/cert-manager) installed (required to automatically generate the TLS certificates for the webhook).
 * `docker` installed on your local machine.
 * optionally: `go` installed on your machine, if you just want to compile the binary locally.
 
@@ -78,6 +143,11 @@ To instruct kTailor to modify a Deployment, you add the `ktailor.dev/fit` label 
 
 * **`central.my-template`**: kTailor looks for the ConfigMap `my-template` in its **own namespace** (usually `ktailor`). These are globally managed by cluster administrators.
 * **`local.my-template`**: kTailor looks for the ConfigMap in the **Deployment's namespace**. This allows application developers to write and manage their own templates.
+
+Example:
+```
+kubectl label --overwrite deployment myapp ktailor.dev/fit="local.ktlr-proxy-tmpl"
+```
 
 **Security Note:** If security takes precedence over developer convenience (to prevent privilege escalation via local namespaces), cluster administrators can disable local templates by setting `allowCustomTemplates: false` in the `ktailor-config` ConfigMap.
 
