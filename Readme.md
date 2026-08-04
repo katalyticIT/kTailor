@@ -15,7 +15,7 @@ and visit the [ktailor.dev](https://www.ktailor.dev/) documentation webpage.
 
 In modern Kubernetes environments, developers often need to inject standard infrastructure components (like monitoring sidecars, proxy configurations, or specific environment variables) into their applications. Instead of cluttering every single Deployment manifest, **kTailor** centralizes these modifications.
 
-kTailor follows the **KISS principle** (Keep It Simple, Stupid). It is designed to be:
+kTailor follows the **KISS principle** (Keep It Smart & Simple). It is designed to be:
 * **Small & Fast:** Written in Go, it utilizes an efficient In-Memory Informer Cache to observe templates. It introduces near-zero latency to your deployment process.
 * **Efficient:** It only targets Deployments carrying a specific trigger label and skips everything else.
 * **Easy to Use:** Templates are written in plain Kubernetes-like YAML. No complex programming or policy languages are required.
