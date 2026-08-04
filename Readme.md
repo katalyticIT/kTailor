@@ -134,6 +134,7 @@ A kTailor template consists of different modification segments:
   * `insertIfNotExists`: Adds the value only if the key is entirely missing.
   * `insertOrOverwrite`: Adds the value or overwrites an existing one.
   * `setOrAppend`: Adds the value or appends it to an existing one (e.g., merging strings with a colon delimiter).
+  * `remove`: Remove env variables or volumeMounts.
 * `addInitContainers`: Injects completely new InitContainers.
 * `addContainers`: Injects completely new sidecar containers.
 * `addVolumes`: Attaches new volumes to the Pod spec.
