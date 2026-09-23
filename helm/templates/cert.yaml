@@ -1,0 +1,31 @@
+{{- if .Values.certs.createManagerResources -}}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "ktailor.fullname" . }}-selfsigned
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ktailor.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}
+---
+{{- if .Values.certs.createManagerResources -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.certs.certificateName | default (printf "%s-serving-cert" (include "ktailor.fullname" .)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ktailor.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+    - {{ include "ktailor.fullname" . }}.{{ .Release.Namespace }}.svc
+    - {{ include "ktailor.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ include "ktailor.fullname" . }}-selfsigned
+  # Name of the generated secrets which is getting mounted
+  secretName: {{ .Values.certs.secretName | default (printf "%s-certs" (include "ktailor.fullname" .)) }}
+{{- end }}
+

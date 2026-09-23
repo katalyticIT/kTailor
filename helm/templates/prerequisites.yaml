@@ -1,0 +1,30 @@
+{{/*
+  This file just checks if cert-manager is already installed and if
+  its API is available in the cluster, respectively.
+
+  Thanks to Lakshay Sharma for helping out on
+  https://stackoverflow.com/questions/80005017/whats-an-elegant-way-to-check-prerequisites-in-a-helm-chart-and-fail-the-inst
+*/}}
+
+
+{{ $failMessage := `
+---------------------------------------------------------------------
+prerequisites.yaml - checking if cert-manager is installed.
+
+kTailor uses cert-manager for issuing cluster internal certificates
+on its web service. Please make sure that it's installed and working
+properly before attempting to install kTailor.
+
+For more information on installing cert-manager, please visit
+https://cert-manager.io/docs/installation/ .
+
+If you receive this message during a helm template run, then
+try adding "--dry-run=server".
+
+---------------------------------------------------------------------` }}
+
+
+
+{{- if not (.Capabilities.APIVersions.Has "cert-manager.io/v1") }}
+  {{- fail $failMessage }}
+{{- end }}

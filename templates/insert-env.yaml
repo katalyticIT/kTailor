@@ -14,4 +14,4 @@ data:
       insertOrOverwrite:
         env:
           - name: KTAILORTEST
-            value: "Env set by central kTailor template."
+            value: "**** Env set by central kTailor template. ****"

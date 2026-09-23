@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "ktailor.fullname" . }}
+  labels:
+    {{- include "ktailor.labels" . | nindent 4 }}
+  annotations:
+    # Tells cert-manager to automatically inject the CA bundle into the clientConfig block
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.certs.certificateName | default (printf "%s-serving-cert" (include "ktailor.fullname" .)) }}
+webhooks:
+  - name: mutate.ktailor.dev
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    # Important: set bahaviour in case webhook is unavailable; default: Ignore
+    failurePolicy: {{ .Values.webhook.failurePolicy | default "Ignore" }}
+    clientConfig:
+      service:
+        name: {{ include "ktailor.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /mutate
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        resources: ["deployments"]
+
