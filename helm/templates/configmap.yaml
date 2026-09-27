@@ -1,0 +1,58 @@
+#
+# runtime configuration for kTailor webhook
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ktailor.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ktailor.labels" . | nindent 4 }}
+data:
+  ktailor.yaml: |
+    transport:
+      port: {{   .Values.service.targetPort }}
+      secure: {{ .Values.service.secure }}
+      cert: {{   .Values.service.cert | quote }}
+      key: {{    .Values.service.key  | quote }}
+    logging:
+      level: {{ .Values.config.logging.level | quote }}
+    templates:
+      allowCustomTemplates: {{ .Values.config.templates.allowCustomTemplates }}
+    namespaces:
+      mode: {{ .Values.config.namespaces.mode | quote }}
+      match:
+        exact:
+        {{- range .Values.config.namespaces.match.exact }}
+          - {{ . | quote }}
+        {{- end }}
+        startsWith:
+        {{- range .Values.config.namespaces.match.startsWith }}
+          - {{ . | quote }}
+        {{- end }}
+        endsWith:
+        {{- range .Values.config.namespaces.match.endsWith }}
+          - {{ . | quote }}
+        {{- end }}
+
+
+---
+#
+# simple kTailor test template for tests; insert/overwrites a simple env variable
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: insert-env
+  namespace: {{ .Release.Namespace }}
+  labels:
+    ktailor.dev/template: "true"
+
+data:
+  template: |
+    ---
+    modifyContainers:
+      insertOrOverwrite:
+        env:
+          - name: KTAILORTEST
+            value: "**** Env set by central kTailor template. ****"

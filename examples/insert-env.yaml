@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: insert-env
   labels:
-    ktailor.io/fit: "central.insert-env"  # inserts env KTAILOR-TEST which gets loop printed on stdout
+    ktailor.dev/fit: "central.insert-env"  # inserts/overwrites env KTAILORTEST which then gets loop printed on stdout
 
 spec:
   replicas: 1
