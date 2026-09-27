@@ -1,3 +1,6 @@
+#
+# runtime configuration for kTailor webhook
+#
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -34,7 +37,9 @@ data:
 
 
 ---
-# simple kTailor test template for tests
+#
+# simple kTailor test template for tests; insert/overwrites a simple env variable
+#
 apiVersion: v1
 kind: ConfigMap
 metadata:

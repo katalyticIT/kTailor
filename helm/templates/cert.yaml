@@ -1,3 +1,4 @@
+# Create the cert-manager issuer
 {{- if .Values.certs.createManagerResources -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -10,6 +11,7 @@ spec:
   selfSigned: {}
 {{- end }}
 ---
+# Let the above issuer create a certificate automatically
 {{- if .Values.certs.createManagerResources -}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
