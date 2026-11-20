@@ -1,6 +1,4 @@
-#
-# MutatingWebhookConfiguration - the magic that activates kTailor
-#
+{{- if .Values.webhook.enabled -}}
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -8,14 +6,24 @@ metadata:
   labels:
     {{- include "ktailor.labels" . | nindent 4 }}
   annotations:
-    # Tells cert-manager to automatically inject the CA bundle into the clientConfig block
+    {{- if eq .Values.certs.provider "cert-manager" }}
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.certs.certificateName | default (printf "%s-serving-cert" (include "ktailor.fullname" .)) }}
+    {{- else if eq .Values.certs.provider "openshift" }}
+    service.beta.openshift.io/inject-cabundle: "true"
+    {{- end }}
+    {{- with .Values.webhook.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 webhooks:
   - name: mutate.ktailor.dev
     admissionReviewVersions: ["v1"]
     sideEffects: None
-    # Important: set bahaviour in case webhook is unavailable; default: Ignore
     failurePolicy: {{ .Values.webhook.failurePolicy | default "Ignore" }}
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds | default 10 }}
+    {{- with .Values.webhook.namespaceSelector }}
+    namespaceSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
     clientConfig:
       service:
         name: {{ include "ktailor.fullname" . }}
@@ -26,4 +34,4 @@ webhooks:
         apiGroups: ["apps"]
         apiVersions: ["v1"]
         resources: ["deployments"]
-
+{{- end }}

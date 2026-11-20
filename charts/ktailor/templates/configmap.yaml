@@ -1,6 +1,3 @@
-#
-# runtime configuration for kTailor webhook
-#
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,10 +8,10 @@ metadata:
 data:
   ktailor.yaml: |
     transport:
-      port: {{   .Values.service.targetPort }}
-      secure: {{ .Values.service.secure }}
-      cert: {{   .Values.service.cert | quote }}
-      key: {{    .Values.service.key  | quote }}
+      port: {{ .Values.config.transport.port }}
+      secure: {{ .Values.config.transport.secure }}
+      cert: {{ .Values.config.transport.cert | quote }}
+      key: {{ .Values.config.transport.key | quote }}
     logging:
       level: {{ .Values.config.logging.level | quote }}
     templates:
@@ -34,25 +31,3 @@ data:
         {{- range .Values.config.namespaces.match.endsWith }}
           - {{ . | quote }}
         {{- end }}
-
-
----
-#
-# simple kTailor test template for tests; insert/overwrites a simple env variable
-#
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: insert-env
-  namespace: {{ .Release.Namespace }}
-  labels:
-    ktailor.dev/template: "true"
-
-data:
-  template: |
-    ---
-    modifyContainers:
-      insertOrOverwrite:
-        env:
-          - name: KTAILORTEST
-            value: "**** Env set by central kTailor template. ****"

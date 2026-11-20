@@ -1,0 +1,111 @@
+
+#
+# values.yaml for kTailor mutating webhook
+#
+
+# number of pods
+replicaCount: 2
+
+image:
+  # path to the image, tag etc.
+  repository: katalytic/ktailor
+  pullPolicy: IfNotPresent
+  tag: "stable"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+# OpenShift SCC compatible (restricted-v2): don't use fixed runAsUser/fsGroup
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 443
+  targetPort: 8443
+  annotations: {}
+
+# mgmt. of MutatingWebhookConfiguration
+webhook:
+  # Set to false to install kTailor w/o active Webhook, e.g. for tests
+  enabled: true
+  # failurePolicy:
+  # 'Ignore' - avoids blockades when starting pods, in case the webhook isn't reachable
+  # 'fail' -  for strict compliance
+  failurePolicy: Ignore
+  timeoutSeconds: 10
+  annotations: {}
+  # Optional API-side namespace filter (addtl. to kTailor-internal filter)
+  namespaceSelector: {}
+  # Example for OpenShift:
+  # namespaceSelector:
+  #   matchExpressions:
+  #     - key: kubernetes.io/metadata.name
+  #       operator: NotIn
+  #       values: ["kube-system", "kube-public", "openshift-monitoring"]
+
+# TLS certificate mgmt:
+# - "cert-manager": uses Issuer & Certificate (Standard)
+# - "openshift": uses OpenShift Service Serving Certificate Signer (no installation of cert-manager needed)
+certs:
+  provider: "openshift"
+  secretName: "ktailor-webhook-certs"
+  # Nur für provider: "cert-manager"
+  createManagerResources: true
+  certificateName: ""
+
+# Anwendungskonfiguration (wird als ktailor.yaml gemountet)
+config:
+  transport:
+    port: 8443
+    secure: true
+    cert: "/etc/ktailor/certs/tls.crt"
+    key: "/etc/ktailor/certs/tls.key"
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARN, ERROR, FATAL
+  templates:
+    # Set to false to allow just central templates from kTailor namespace (mngd. by admin)
+    allowCustomTemplates: true
+  namespaces:
+    # 'blocklist' or 'allowlist' (adds to the hard coded system namespace filter)
+    mode: "blocklist"
+    match:
+      exact: []
+      startsWith: []
+      endsWith: []
+
+# Central templates e.g. for tests (are created in the kTailor namespace)
+centralTemplates:
+  insertEnv:
+    enabled: true
+    value: "**** Env set by central kTailor template. ****"  # value to be set in env var KTAILORTEST
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
