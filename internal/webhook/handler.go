@@ -46,6 +46,15 @@ func (w *loggingResponseWriter) Write(b []byte) (int, error) {
 	return n, err
 }
 
+// Healthz responds to cluster liveness/readiness probes and logs each call
+func Healthz() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.Logf("INFO", "Healthz called from %s", r.RemoteAddr)
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	}
+}
+
 // Serve now accepts the ktailorNamespace
 func Serve(cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailorNamespace string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -54,9 +63,19 @@ func Serve(cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailor
 			logger.Logf("DEBUG", "HTTP Request %s %s Status: %d Length: %d", r.Method, r.URL.Path, lw.statusCode, lw.length)
 		}()
 
+		if r.Method != http.MethodPost {
+			logger.Logf("WARN", "Rejected %s request to %s from %s (only POST allowed)", r.Method, r.URL.Path, r.RemoteAddr)
+			http.Error(lw, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(lw, "could not read body", http.StatusBadRequest)
+			return
+		}
+		if len(body) == 0 {
+			http.Error(lw, "empty request body", http.StatusBadRequest)
 			return
 		}
 
@@ -66,7 +85,17 @@ func Serve(cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailor
 			return
 		}
 
+		if admissionReviewReq.Request == nil {
+			logger.Logf("WARN", "AdmissionReview request is nil")
+			http.Error(lw, "admission review request is nil", http.StatusBadRequest)
+			return
+		}
+
 		admissionResponse := mutate(admissionReviewReq.Request, cfg, lister, ktailorNamespace)
+		if admissionResponse.Allowed && len(admissionResponse.Patch) == 0 {
+			logger.Logf("INFO", "Mutate called, no change.")
+		}
+
 		admissionReviewResponse := admissionv1.AdmissionReview{
 			TypeMeta: metav1.TypeMeta{Kind: "AdmissionReview", APIVersion: "admission.k8s.io/v1"},
 			Response: admissionResponse,
@@ -74,7 +103,7 @@ func Serve(cfg *config.MainConfig, lister corev1listers.ConfigMapLister, ktailor
 		admissionReviewResponse.Response.UID = admissionReviewReq.Request.UID
 
 		respBytes, _ := json.Marshal(admissionReviewResponse)
-		lw.Write(respBytes)
+		_, _ = lw.Write(respBytes)
 	}
 }
 
@@ -134,13 +163,17 @@ func mutate(req *admissionv1.AdmissionRequest, cfg *config.MainConfig, lister co
 		return &admissionv1.AdmissionResponse{Allowed: true}
 	}
 
-	logger.Logf("INFO", "Applying %s template '%s' to deployment '%s'", prefix, templateName, deployment.Name)
-
 	patchBytes, err := modifier.CreatePatch(&deployment, template, req.Object.Raw)
 	if err != nil {
 		logger.Logf("ERROR", "Failed to create JSON patch for %s: %v", deployment.Name, err)
 		return &admissionv1.AdmissionResponse{Result: &metav1.Status{Message: err.Error()}}
 	}
+
+	if len(patchBytes) == 0 {
+		return &admissionv1.AdmissionResponse{Allowed: true}
+	}
+
+	logger.Logf("INFO", "Applying %s template '%s' to deployment '%s/%s'", prefix, templateName, req.Namespace, deployment.Name)
 
 	pt := admissionv1.PatchTypeJSONPatch
 	return &admissionv1.AdmissionResponse{

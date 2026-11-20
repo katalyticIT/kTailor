@@ -97,6 +97,7 @@ func main() {
 	mux := http.NewServeMux()
 	// Pass the ktailorNamespace to the webhook handler
 	mux.HandleFunc("/mutate", webhook.Serve(cfg, cmLister, ktailorNamespace))
+	mux.HandleFunc("/healthz", webhook.Healthz())
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Transport.Port),

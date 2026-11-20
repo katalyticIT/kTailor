@@ -38,13 +38,17 @@ spec:
               containerPort: {{ .Values.config.transport.port }}
               protocol: TCP
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: https
+              scheme: {{ if .Values.config.transport.secure }}HTTPS{{ else }}HTTP{{ end }}
             initialDelaySeconds: 5
             periodSeconds: 15
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: https
+              scheme: {{ if .Values.config.transport.secure }}HTTPS{{ else }}HTTP{{ end }}
             initialDelaySeconds: 3
             periodSeconds: 10
           env:

@@ -299,6 +299,14 @@ oc run curl-test --rm -i --restart=Never -n ktailor \
 curl should establish the TLS connection without any SSL issues, and the HTTP headers
 (GET /mutate HTTP/2, etc.) should be visible in the output.
 
+*Test the healthz checkpoints*
+```bash
+oc run curl-test --rm -i --restart=Never -n ktailor \
+   --image=registry.access.redhat.com/ubi9/ubi-minimal:latest \
+   --  curl -k -i https://ktailor.ktailor.svc/healthz
+```
+This should give a http response and finally an 'ok'.
+
 
 ## Acknowledgements
 A quick note: AI tools were used to assist in the coding and documentation of this project.
