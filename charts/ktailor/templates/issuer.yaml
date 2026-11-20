@@ -1,0 +1,11 @@
+{{- if and (eq .Values.certs.provider "cert-manager") .Values.certs.createManagerResources -}}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "ktailor.fullname" . }}-selfsigned
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ktailor.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}

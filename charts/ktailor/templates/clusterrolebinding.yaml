@@ -1,17 +1,3 @@
-#
-# kTailor needs a ClusterRole to be able to read ConfigMaps in foreign namespaces
-#
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: {{ include "ktailor.fullname" . }}
-  labels:
-    {{- include "ktailor.labels" . | nindent 4 }}
-rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -26,4 +12,3 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "ktailor.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
-

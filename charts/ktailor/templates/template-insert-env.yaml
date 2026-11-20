@@ -1,0 +1,18 @@
+{{- if .Values.centralTemplates.insertEnv.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: insert-env
+  namespace: {{ .Release.Namespace }}
+  labels:
+    ktailor.dev/template: "true"
+    {{- include "ktailor.labels" . | nindent 4 }}
+data:
+  template: |
+    ---
+    modifyContainers:
+      insertOrOverwrite:
+        env:
+          - name: KTAILORTEST
+            value: {{ .Values.centralTemplates.insertEnv.value | quote }}
+{{- end }}
